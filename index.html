@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KH-Rechner</title>
+
+<style>
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --card-soft:#f9fbff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --accent:#4f8cff;
+  --accent-soft:#eaf2ff;
+  --success:#0f766e;
+  --shadow:0 10px 30px rgba(31,41,55,.08);
+  --radius:20px;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  padding:0;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,#f8fbff 0%, #f4f6fa 100%);
+  color:var(--text);
+}
+
+body{
+  min-height:100vh;
+  padding:20px 14px 40px;
+}
+
+.app{
+  max-width:720px;
+  margin:0 auto;
+}
+
+.hero{
+  margin:8px 0 18px;
+  padding:18px 18px 8px;
+}
+
+.hero h1{
+  margin:0 0 6px;
+  font-size:clamp(28px,4vw,38px);
+  line-height:1.1;
+}
+
+.hero p{
+  margin:0;
+  color:var(--muted);
+  font-size:15px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid rgba(229,231,235,.9);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  margin-bottom:16px;
+}
+
+.section-title{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.02em;
+  color:var(--muted);
+  margin:0 0 12px;
+  text-transform:uppercase;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+.field:last-child{
+  margin-bottom:0;
+}
+
+.label{
+  display:block;
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:8px;
+  color:var(--text);
+}
+
+.input,
+.select{
+  width:100%;
+  min-height:54px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  padding:14px 16px;
+  font-size:17px;
+  color:var(--text);
+  outline:none;
+  transition:border-color .18s ease, box-shadow .18s ease, transform .05s ease;
+}
+
+.input:focus,
+.select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(79,140,255,.12);
+}
+
+.input::placeholder{
+  color:#9ca3af;
+}
+
+.unit-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  background:var(--accent-soft);
+  color:#2459c6;
+  font-size:14px;
+  font-weight:600;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.result-wrap{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+
+.result-main{
+  background:linear-gradient(180deg,#f7fbff 0%, #eef5ff 100%);
+  border:1px solid #dbe7ff;
+  border-radius:20px;
+  padding:16px;
+}
+
+.result-main .big{
+  font-size:34px;
+  line-height:1;
+  font-weight:800;
+  margin:6px 0 2px;
+  color:#1849a9;
+}
+
+.result-main .sub{
+  color:var(--muted);
+  font-size:14px;
+}
+
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.result-card{
+  background:var(--card-soft);
+  border:1px solid #e8edf5;
+  border-radius:18px;
+  padding:14px;
+}
+
+.result-card .k{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.result-card .v{
+  font-size:24px;
+  font-weight:800;
+  line-height:1.1;
+}
+
+.hint{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.4;
+}
+
+.footer-note{
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:10px;
+}
+
+@media (max-width:560px){
+  .grid-2{
+    grid-template-columns:1fr;
+  }
+
+  .result-grid{
+    grid-template-columns:1fr;
+  }
+
+  .card{
+    padding:16px;
+    border-radius:18px;
+  }
+
+  .input,
+  .select{
+    min-height:52px;
+    font-size:16px;
+  }
+
+  .result-main .big{
+    font-size:30px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="hero">
+    <h1>KH-Rechner</h1>
+    <p>Schnell Kohlenhydrate, KE/BE und Insulin berechnen.</p>
+  </div>
+
+  <div class="card">
+  <div class="section-title">Lebensmittel</div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label class="label" for="search">Suche</label>
+      <input
+        id="search"
+        class="input"
+        placeholder="z. B. Brot, Apfel, Milch"
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="field">
+      <label class="label" for="catFilter">Kategorie</label>
+      <select id="catFilter" class="select">
+        <option value="Alle">Alle</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label" for="foodSelect">Auswahl</label>
+    <select id="foodSelect" class="select"></select>
+  </div>
+
+  <div id="unitInfo" class="unit-chip">Einheit: –</div>
+</div>
+
+  <div class="card">
+    <div class="section-title">Eingabe</div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label class="label" for="amount">Menge</label>
+        <input id="amount" class="input" type="number" step="0.1" inputmode="decimal" placeholder="z. B. 50">
+      </div>
+
+      <div class="field">
+        <label class="label" for="displayUnit">Anzeige</label>
+        <select id="displayUnit" class="select">
+          <option value="KE">KE</option>
+          <option value="BE">BE</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label class="label" for="factor">Faktor (g KH pro 1 IE)</label>
+        <input id="factor" class="input" type="number" value="10" step="0.1" inputmode="decimal">
+      </div>
+
+      <div class="field">
+        <label class="label" for="rounding">Rundung IE</label>
+        <select id="rounding" class="select">
+          <option value="0">keine</option>
+          <option value="0.1">0,1</option>
+          <option value="0.5">0,5</option>
+          <option value="1">1,0</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Ergebnis</div>
+
+    <div class="result-wrap">
+      <div class="result-main">
+        <div class="k">Berechnete Menge</div>
+        <div class="big" id="ke">–</div>
+        <div class="sub">KE oder BE je nach Auswahl</div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="k">KH in Gramm</div>
+          <div class="v" id="carbs">–</div>
+        </div>
+
+        <div class="result-card">
+          <div class="k">Insulin</div>
+          <div class="v" id="ie">–</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint" id="hintText">
+      Bitte ein Lebensmittel auswählen und eine Menge eingeben.
+    </div>
+  </div>
+
+  <div class="footer-note">*Datensatz KKR</div>
+</div>
+
+<script type="module">
+import { fmtDisplay, foodUnit } from '../shared/kh-format.js';
+import {
+  loadRepoPool,
+  searchBank,
+  getItemById,
+  getCategories,
+  filterBankByCategory
+} from '../shared/kh-data.js';
+import { calcForItem } from '../shared/kh-calc.js';
+
+let BANK = [];
+
+const searchInput = document.getElementById('search');
+const foodSelect = document.getElementById('foodSelect');
+const amountInput = document.getElementById('amount');
+const factorInput = document.getElementById('factor');
+const displayUnit = document.getElementById('displayUnit');
+const rounding = document.getElementById('rounding');
+
+const carbsEl = document.getElementById('carbs');
+const keEl = document.getElementById('ke');
+const ieEl = document.getElementById('ie');
+const unitInfo = document.getElementById('unitInfo');
+const hintText = document.getElementById('hintText');
+
+const catFilter = document.getElementById('catFilter');
+
+async function init() {
+  BANK = await loadRepoPool('../ke_fragepool.csv');
+
+  renderCategoryFilter();
+  refreshFoodList();
+
+  if (BANK.length && !amountInput.value) {
+    amountInput.value = '';
+  }
+
+  updateCalc();
+}
+
+function renderCategoryFilter() {
+  if (!catFilter) return;
+
+  const cats = getCategories(BANK);
+
+  catFilter.innerHTML = '';
+
+  const allOpt = document.createElement('option');
+  allOpt.value = 'Alle';
+  allOpt.textContent = 'Alle';
+  catFilter.appendChild(allOpt);
+
+  cats.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    catFilter.appendChild(opt);
+  });
+
+  catFilter.value = 'Alle';
+}
+
+function renderFoodList(list) {
+  foodSelect.innerHTML = '';
+
+  if (!list.length) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Keine Treffer';
+    foodSelect.appendChild(opt);
+    return;
+  }
+
+  list.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.id;
+    opt.textContent = `${item.emoji ? item.emoji + ' ' : ''}${item.name}`;
+    foodSelect.appendChild(opt);
+  });
+}
+
+function getFilteredList() {
+  const selectedCategory = catFilter ? catFilter.value : 'Alle';
+  const byCat = filterBankByCategory(BANK, selectedCategory);
+  return searchBank(byCat, searchInput.value);
+}
+
+let lastCategory = 'Alle';
+
+function refreshFoodList() {
+  const list = getFilteredList();
+  const selectedCategory = catFilter ? catFilter.value : 'Alle';
+  const currentSelectedId = foodSelect.value;
+
+  renderFoodList(list);
+
+  if (!list.length) {
+    updateUnitInfo();
+    updateCalc();
+    lastCategory = selectedCategory;
+    return;
+  }
+
+  const switchedToAll = lastCategory !== 'Alle' && selectedCategory === 'Alle';
+
+  if (switchedToAll) {
+    foodSelect.value = list[0].id;
+  } else {
+    const hasCurrentStill = list.some(item => item.id === currentSelectedId);
+    foodSelect.value = hasCurrentStill ? currentSelectedId : list[0].id;
+  }
+
+  updateUnitInfo();
+  updateCalc();
+
+  lastCategory = selectedCategory;
+}
+
+function updateUnitInfo() {
+  const item = getItemById(BANK, foodSelect.value);
+
+  if (!item) {
+    unitInfo.textContent = 'Einheit: –';
+    return;
+  }
+
+  unitInfo.textContent = `Einheit: ${foodUnit(item)}`;
+}
+
+function resetOutput() {
+  carbsEl.textContent = '–';
+  keEl.textContent = '–';
+  ieEl.textContent = '–';
+}
+
+function updateCalc() {
+  const item = getItemById(BANK, foodSelect.value);
+
+  if (!item) {
+    resetOutput();
+    hintText.textContent = 'Bitte ein Lebensmittel auswählen.';
+    return;
+  }
+
+  const amount = Number(amountInput.value || 0);
+
+  if (!(amount > 0)) {
+    resetOutput();
+    hintText.textContent = `Bitte eine Menge in ${foodUnit(item)} eingeben.`;
+    return;
+  }
+
+  const result = calcForItem(item, amount, {
+    factor: Number(factorInput.value || 10),
+    displayUnit: displayUnit.value,
+    rounding: Number(rounding.value || 0)
+  });
+
+  carbsEl.textContent = `${fmtDisplay(result.carbsG, 2)} g`;
+  keEl.textContent = `${fmtDisplay(result.displayValue, 2)} ${result.displayUnit}`;
+  ieEl.textContent = `${fmtDisplay(result.ie, 2)} IE`;
+
+  hintText.textContent = `${fmtDisplay(amount, 2)} ${foodUnit(item)} von ${item.name}`;
+}
+
+searchInput.addEventListener('input', () => {
+  amountInput.value = '';
+  resetOutput();
+  hintText.textContent = 'Bitte Menge eingeben.';
+  refreshFoodList();
+});
+
+if (catFilter) {
+  catFilter.addEventListener('change', refreshFoodList);
+}
+
+foodSelect.addEventListener('change', () => {
+  updateUnitInfo();
+  updateCalc();
+});
+
+amountInput.addEventListener('input', updateCalc);
+factorInput.addEventListener('input', updateCalc);
+displayUnit.addEventListener('change', updateCalc);
+rounding.addEventListener('change', updateCalc);
+
+init();
+</script>
+</body>
+</html>
