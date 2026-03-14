@@ -204,6 +204,40 @@ body{
   margin-top:10px;
 }
 
+.sticky-result{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+
+  background:white;
+  border-top:1px solid #e5e7eb;
+
+  padding:12px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  box-shadow:0 -8px 20px rgba(0,0,0,.08);
+
+  font-weight:700;
+  font-size:20px;
+}
+
+.sticky-ke{
+  color:#1849a9;
+}
+
+.sticky-ie{
+  color:#0f766e;
+}
+
+@media (min-width:600px){
+  .sticky-result{
+    display:none;u
+  }
+}
+
 @media (max-width:560px){
   .grid-2{
     grid-template-columns:1fr;
@@ -345,7 +379,10 @@ body{
 
   <div class="footer-note">*Datensatz KKR</div>
   
-  
+  <div class="sticky-result" id="stickyResult">
+      <div class="sticky-ke" id="stickyKE">–</div>
+      <div class="sticky-ie" id="stickyIE">–</div>
+  </div>
 </div>
 
 <script type="module">
@@ -360,6 +397,7 @@ import {
 import { calcForItem } from './shared/kh-calc.js';
 
 let BANK = [];
+let lastCategory = 'Alle';
 
 const searchInput = document.getElementById('search');
 const foodSelect = document.getElementById('foodSelect');
@@ -373,8 +411,10 @@ const keEl = document.getElementById('ke');
 const ieEl = document.getElementById('ie');
 const unitInfo = document.getElementById('unitInfo');
 const hintText = document.getElementById('hintText');
-
 const catFilter = document.getElementById('catFilter');
+
+const stickyKE = document.getElementById('stickyKE');
+const stickyIE = document.getElementById('stickyIE');
 
 async function init() {
   BANK = await loadRepoPool('ke_fragepool.csv');
@@ -436,8 +476,6 @@ function getFilteredList() {
   return searchBank(byCat, searchInput.value);
 }
 
-let lastCategory = 'Alle';
-
 function refreshFoodList() {
   const list = getFilteredList();
   const selectedCategory = catFilter ? catFilter.value : 'Alle';
@@ -463,7 +501,6 @@ function refreshFoodList() {
 
   updateUnitInfo();
   updateCalc();
-
   lastCategory = selectedCategory;
 }
 
@@ -482,6 +519,11 @@ function resetOutput() {
   carbsEl.textContent = '–';
   keEl.textContent = '–';
   ieEl.textContent = '–';
+
+  if (stickyKE && stickyIE) {
+    stickyKE.textContent = '–';
+    stickyIE.textContent = '–';
+  }
 }
 
 function updateCalc() {
@@ -511,6 +553,11 @@ function updateCalc() {
   keEl.textContent = `${fmtDisplay(result.displayValue, 2)} ${result.displayUnit}`;
   ieEl.textContent = `${fmtDisplay(result.ie, 2)} IE`;
 
+  if (stickyKE && stickyIE) {
+    stickyKE.textContent = `${fmtDisplay(result.displayValue, 2)} ${result.displayUnit}`;
+    stickyIE.textContent = `${fmtDisplay(result.ie, 2)} IE`;
+  }
+
   hintText.textContent = `${fmtDisplay(amount, 2)} ${foodUnit(item)} von ${item.name}`;
 }
 
@@ -531,8 +578,9 @@ foodSelect.addEventListener('change', () => {
 });
 
 amountInput.addEventListener('input', updateCalc);
-amountInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
+
+amountInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
     amountInput.blur();
   }
 });
