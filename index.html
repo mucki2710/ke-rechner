@@ -365,7 +365,7 @@ const hintText = document.getElementById('hintText');
 const catFilter = document.getElementById('catFilter');
 
 async function init() {
-  BANK = await loadRepoPool('../ke_fragepool.csv');
+  BANK = await loadRepoPool('ke_fragepool.csv');
 
   renderCategoryFilter();
   refreshFoodList();
